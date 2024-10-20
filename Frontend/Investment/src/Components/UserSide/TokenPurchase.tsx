@@ -11,21 +11,41 @@ const TokenPurchase: React.FC = () => {
   const [investorId, setInvestorId] = useState<string | null>(null);
   const [purchasePrice, setPurchasePrice] = useState<number>(0);
   const [usedBonusCodes, setUsedBonusCodes] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // For account creation (assuming investor creation logic)
+  // Fetch bonus codes on component load
+  useEffect(() => {
+    fetchBonusCodes();
+  }, []);
+
+  const fetchBonusCodes = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/bonus/all");
+      const data = await response.json();
+      setBonusCodesData(data);
+      setTokenOptions(
+        data.map((bonus: any) => ({
+          _id: bonus._id,
+          name: bonus.token,
+          price: bonus.tokenPrice,
+        }))
+      );
+    } catch (error) {
+      console.error("Error fetching bonus codes:", error);
+      setError("Failed to fetch bonus codes.");
+    }
+  };
+
   const handleCreateAccount = async () => {
-    const id = `investor-${Math.random().toString(36).substr(2, 9)}`; // Generate random ID
+    const id = `investor-${Math.random().toString(36).substr(2, 9)}`;
     setInvestorId(id);
 
     try {
-      // Send a POST request to create the investor account with the generated ID
       const response = await fetch(
         "http://localhost:8000/api/investor/create",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             name: "Investor Name",
             email: "email@example.com",
@@ -46,51 +66,25 @@ const TokenPurchase: React.FC = () => {
     }
   };
 
-
-  useEffect(() => {
-    const fetchBonusCodes = async () => {
-      try {
-        const response = await fetch("http://localhost:8000/api/bonus/all");
-        const data = await response.json();
-        setBonusCodesData(data);
-        const tokens = data.map((bonus) => ({
-          _id: bonus._id,
-          name: bonus.token,
-          price: bonus.tokenPrice,
-        }));
-        setTokenOptions(tokens);
-      } catch (error) {
-        console.error("Error fetching bonus codes:", error);
-        setError("Failed to fetch bonus codes.");
-      }
-    };
-    fetchBonusCodes();
-  }, []);
-
   const handleBonusCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const code = e.target.value;
-    setBonusCode(code);
-    validateBonusCode(code);
+    setBonusCode(e.target.value);
+    validateBonusCode(e.target.value);
   };
 
   const validateBonusCode = (code: string) => {
     const bonusCodeEntry = bonusCodesData.find((b) => b.code === code);
     const currentDate = new Date();
 
-    if (bonusCodeEntry) {
-      if (
-        bonusCodeEntry.active &&
-        new Date(bonusCodeEntry.expirationDate) > currentDate
-      ) {
-        setDiscount(bonusCodeEntry.discountPercentage);
-        setError("");
-      } else {
-        setDiscount(0);
-        setError("Invalid, expired, or deactivated bonus code.");
-      }
+    if (
+      bonusCodeEntry &&
+      bonusCodeEntry.active &&
+      new Date(bonusCodeEntry.expirationDate) > currentDate
+    ) {
+      setDiscount(bonusCodeEntry.discountPercentage);
+      setError("");
     } else {
       setDiscount(0);
-      setError("Invalid or expired bonus code.");
+      setError("Invalid, expired, or deactivated bonus code.");
     }
   };
 
@@ -99,6 +93,7 @@ const TokenPurchase: React.FC = () => {
     setPurchasePrice(price);
     setBonusCode("");
     setDiscount(0);
+    setError("");
   };
 
   const handlePurchase = async () => {
@@ -109,34 +104,41 @@ const TokenPurchase: React.FC = () => {
       return;
     }
 
+    setIsLoading(true);
     try {
       const response = await fetch("http://localhost:8000/api/bonus/apply", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          investorId, // Use the generated investorId
+          investorId,
           code: bonusCode,
           tokenAmount: purchasePrice,
         }),
       });
 
       const data = await response.json();
-
       if (response.ok) {
         setUsedBonusCodes((prev) => [...prev, bonusCode]);
         alert(
           `Purchase successful! You bought tokens worth: ${data.finalTokenAmount}`
         );
-        setSelectedToken(null); // Reset after successful purchase
+        resetPurchaseForm();
       } else {
         setError(data.message || "Purchase failed.");
       }
     } catch (error) {
       console.error("Error making purchase:", error);
       setError("Failed to make purchase.");
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  const resetPurchaseForm = () => {
+    setSelectedToken(null);
+    setPurchasePrice(0);
+    setBonusCode("");
+    setDiscount(0);
   };
 
   const calculateTotal = () => {
@@ -147,7 +149,6 @@ const TokenPurchase: React.FC = () => {
   return (
     <div className="token-purchase">
       <h2>Token Purchase</h2>
-
       {!investorId && (
         <div className="account-creation">
           <h3>Create an Account</h3>
@@ -169,8 +170,6 @@ const TokenPurchase: React.FC = () => {
               >
                 Buy Token
               </button>
-
-              {/* Show purchase form below the selected token */}
               {selectedToken === token._id && (
                 <div className="purchase-form">
                   <div className="form-group">
@@ -195,7 +194,9 @@ const TokenPurchase: React.FC = () => {
                     {error && <p className="error">{error}</p>}
                   </div>
                   <p>Total after discount: {calculateTotal()} USD</p>
-                  <button onClick={handlePurchase}>Confirm Purchase</button>
+                  <button onClick={handlePurchase} disabled={isLoading}>
+                    {isLoading ? "Processing..." : "Confirm Purchase"}
+                  </button>
                 </div>
               )}
             </li>

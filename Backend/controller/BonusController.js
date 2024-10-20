@@ -122,3 +122,25 @@ exports.bonusHistory = async (req, res) => {
   );
   res.json(bonusCode);
 };
+
+exports.bonusHistory = async (req, res) => {
+  const investorId = req.params.investorId;
+
+  try {
+    const investor = await Investor.findById(investorId);
+    if (!investor) {
+      return res.status(404).json({ message: "Investor not found" });
+    }
+
+    const bonusCodesUsed = investor.bonusCodesUsed;
+    const bonusCodeHistory = await BonusCode.find({
+      _id: { $in: bonusCodesUsed },
+    });
+
+    res.json(bonusCodeHistory);
+  } catch (error) {
+    console.error("Error fetching bonus code history:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+

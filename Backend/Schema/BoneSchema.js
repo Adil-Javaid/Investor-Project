@@ -7,7 +7,7 @@ const BonusCodeSchema = new mongoose.Schema({
   expirationDate: { type: Date, required: true },
   tokenPrice: { type: Number, required: true },
   active: { type: Boolean, default: true },
-  deactivatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Investor" }, // For tracking who deactivated it
+  deactivatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Investor" },
   usedBy: [{ type: String, ref: "Investor" }],
 });
 

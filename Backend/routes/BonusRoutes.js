@@ -13,6 +13,6 @@ router.post("/generate", generateBonusCode);
 router.get("/all", getAllBonusCodes);
 router.post("/toggle", toggleBonusCodeStatus);
 router.post("/apply", applyBonusCode);
-router.get("/history/:codeId", bonusHistory);
+router.get("/investors/:investorId/bonus-history", bonusHistory);
 
 module.exports = router;

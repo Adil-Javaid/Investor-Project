@@ -1,49 +1,66 @@
-import React, { useState, useEffect } from "react";
-import { getBonusHistory } from "../../Services/bonusService";
-import './bonushistory.css'
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
-interface Investor {
-  _id: string;
-  name: string;
-  tokenPurchased: number;
-}
-
-interface BonusCodeHistory {
-  code: string;
-  usedBy: Investor[];
-}
-
-const BonusHistory: React.FC<{ codeId: string }> = ({ codeId }) => {
-  const [history, setHistory] = useState<BonusCodeHistory | null>(null);
+const BonusCodeHistory = ({ investorId }) => {
+  const [bonusHistory, setBonusHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
+    const fetchBonusHistory = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8000/api/bonus/investors/${investorId}/bonus-history`
+        );
+        console.log(response.data); // Log the response data
+        setBonusHistory(response.data);
+      } catch (err) {
+        setError("Failed to fetch bonus code history");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchBonusHistory();
-  }, []);
+  }, [investorId]);
 
-  const fetchBonusHistory = async () => {
-    try {
-      const response = await getBonusHistory(codeId);
-      setHistory(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
-  if (!history) return <div>Loading...</div>;
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
 
   return (
-    <div className="bonus-history">
-      <h3>Bonus Code History for {history.code}</h3>
-      <ul>
-        {history.usedBy.map((investor) => (
-          <li key={investor._id}>
-            Investor: {investor.name} | Tokens Purchased:{" "}
-            {investor.tokenPurchased}
-          </li>
-        ))}
-      </ul>
+    <div>
+      <h2>Bonus Code History</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Discount Percentage</th>
+            <th>Token Price</th>
+            <th>Expiration Date</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {bonusHistory.map((code) => (
+            <tr key={code._id}>
+              <td>{code.code}</td>
+              <td>{code.discountPercentage}%</td>
+              <td>${code.tokenPrice}</td>
+              <td>{new Date(code.expirationDate).toLocaleDateString()}</td>
+              <td>{code.active ? "Active" : "Inactive"}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
 
-export default BonusHistory;
+export default BonusCodeHistory;

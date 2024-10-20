@@ -3,6 +3,7 @@ import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import AdminDashboard from "./Components/AdminDashboard/AdminDashboard";
 import TokenPurchase from "./Components/UserSide/TokenPurchase";
+import AdminLogin from "./Components/AdminDashboard/AdminLogin";
 
 const App: React.FC = () => {
   return (
@@ -10,6 +11,7 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/purchase" element={<TokenPurchase />} />
+        <Route path="/" element={<AdminLogin />} />
       </Routes>
     </Router>
   );

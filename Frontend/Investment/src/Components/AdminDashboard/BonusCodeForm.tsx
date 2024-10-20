@@ -40,7 +40,7 @@ const BonusCodeForm: React.FC = () => {
           required
         />
       </div>
-      <div>
+      <div className="bonus-form">
         <label>Expiration Date</label>
         <input
           type="date"
@@ -49,7 +49,7 @@ const BonusCodeForm: React.FC = () => {
           required
         />
       </div>
-      <div>
+      <div className="bonus-form">
         <label>Token Price</label>
         <input
           type="number"

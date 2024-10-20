@@ -1,17 +1,17 @@
 .admin-dashboard {
   font-family: Arial, sans-serif;
-  background-color: #f4f6f8;
+  background-color: #a7ddf5;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
-
 .dashboard-content {
   display: flex;
   flex-direction: column;
   gap: 20px;
   justify-content: center;
   align-items: center;
+  text-align: center;
   margin-top: 20px;
 }
 
@@ -25,11 +25,10 @@ h2 {
 }
 
 .dashboard-content div {
-  background-color: white;
+  background-color: #ffffff;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  width: auto;
 }
 
 button {

@@ -8,13 +8,13 @@ const AdminDashboard: React.FC = () => {
   const [selectedBonusCode, setSelectedBonusCode] = useState<string | null>(
     null
   );
-  const investorId = "investor-6fl047vuq"; 
+  const investorId = "investor-s0sot5mky"; 
 
   return (
     <div className="admin-dashboard">
       <h1>Admin Dashboard</h1>
       <div className="dashboard-content">
-        <div>
+        <div style={{ width: "40%" }}>
           <h2>Create Bonus Code</h2>
           <BonusCodeForm />
         </div>

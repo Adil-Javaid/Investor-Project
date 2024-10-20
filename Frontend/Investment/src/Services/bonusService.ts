@@ -5,11 +5,13 @@ const API_URL = "http://localhost:8000/api/bonus";
 
 export const generateBonusCode = (
   discountPercentage: number,
-  expirationDate: string
+  expirationDate: string,
+  tokenPrice: number // Include token price
 ) => {
   return axios.post(`${API_URL}/generate`, {
     discountPercentage,
     expirationDate,
+    tokenPrice, // Send token price along with the request
   });
 };
 

@@ -1,36 +1,73 @@
 import React, { useState } from "react";
 import BonusCodeForm from "./BonusCodeForm";
 import BonusCodeList from "./BonusCodeList";
-import "./AdminDashboard.css";
 import BonusCodeHistory from "./BonusHistory";
+import "./AdminDashboard.css";
 
 const AdminDashboard: React.FC = () => {
+  const [selectedMenu, setSelectedMenu] = useState<string | null>("create");
   const [selectedBonusCode, setSelectedBonusCode] = useState<string | null>(
     null
   );
-  const investorId = "investor-s0sot5mky"; 
+  const investorId = "investor-wdtyw55eb";
+
+  const renderContent = () => {
+    switch (selectedMenu) {
+      case "create":
+        return (
+          <div>
+            <h2>Create Bonus Code</h2>
+            <BonusCodeForm />
+          </div>
+        );
+      case "manage":
+        return (
+          <div>
+            <h2>Manage Bonus Codes</h2>
+            <BonusCodeList onSelectBonusCode={setSelectedBonusCode} />
+          </div>
+        );
+      case "history":
+        return (
+          selectedBonusCode && (
+            <div>
+              <h2>Bonus Code Usage History</h2>
+              <BonusCodeHistory investorId={investorId} />
+            </div>
+          )
+        );
+      default:
+        return <div>Select an option from the menu</div>;
+    }
+  };
 
   return (
     <div className="admin-dashboard">
-      <h1>Admin Dashboard</h1>
-      <div className="dashboard-content">
-        <div style={{ width: "40%" }}>
-          <h2>Create Bonus Code</h2>
-          <BonusCodeForm />
-        </div>
-        <div>
-          <h2>Manage Bonus Codes</h2>
-          <BonusCodeList onSelectBonusCode={setSelectedBonusCode} />
-        </div>
+      <div className="sidebar">
+        <h1>Admin Dashboard</h1>
+        <ul className="menu-list">
+          <li
+            className={selectedMenu === "create" ? "active" : ""}
+            onClick={() => setSelectedMenu("create")}
+          >
+            Create Bonus Code
+          </li>
+          <li
+            className={selectedMenu === "manage" ? "active" : ""}
+            onClick={() => setSelectedMenu("manage")}
+          >
+            Manage Bonus Codes
+          </li>
+          <li
+            className={selectedMenu === "history" ? "active" : ""}
+            onClick={() => setSelectedMenu("history")}
+          >
+            Bonus Code History
+          </li>
+        </ul>
       </div>
-      {selectedBonusCode && (
-        <div className="dashboard-content">
-          <div style={{ width: "100%" }}>
-            <h2>Bonus Code Usage History</h2>
-            <BonusCodeHistory investorId={investorId} />
-          </div>
-        </div>
-      )}
+
+      <div className="content">{renderContent()}</div>
     </div>
   );
 };

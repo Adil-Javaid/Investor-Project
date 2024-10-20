@@ -2,18 +2,18 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AdminLogin.css";
 
-const AdminLogin: React.FC = () => {
+const AdminSignUp: React.FC = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Call the API to log in the admin
+    // Call the API to create the admin account
     const response = await fetch(
-      "http://localhost:8000/api/bonus/admin/login",
+      "http://localhost:8000/api/bonus/admin/signup",
       {
         method: "POST",
         headers: {
@@ -24,20 +24,20 @@ const AdminLogin: React.FC = () => {
     );
 
     if (response.ok) {
-      // Redirect to the admin dashboard on successful login
-      navigate("/admin");
+      // Redirect to login page after successful sign-up
+      navigate("/login");
     } else {
       const data = await response.json();
-      setError(data.message || "Invalid username or password");
+      setError(data.message || "An error occurred during sign-up");
     }
   };
 
   return (
     <div className="admin-login-container">
       <div className="admin-login-form">
-        <h2>Admin Login</h2>
+        <h2>Admin Sign-Up</h2>
         {error && <div className="error-message">{error}</div>}
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleSignUp}>
           <div className="form-group">
             <label>Username</label>
             <input
@@ -56,11 +56,11 @@ const AdminLogin: React.FC = () => {
               required
             />
           </div>
-          <button type="submit">Login</button>
+          <button type="submit">Sign Up</button>
         </form>
       </div>
     </div>
   );
 };
 
-export default AdminLogin;
+export default AdminSignUp;

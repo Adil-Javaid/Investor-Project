@@ -6,22 +6,38 @@ const API_URL = "http://localhost:8000/api/bonus";
 export const generateBonusCode = (
   discountPercentage: number,
   expirationDate: string,
-  tokenPrice: number // Include token price
+  tokenPrice: number,
+  tokenCount: number // Include token count in the request
 ) => {
   return axios.post(`${API_URL}/generate`, {
     discountPercentage,
     expirationDate,
-    tokenPrice, // Send token price along with the request
+    tokenPrice,
+    tokenCount, // Send token count along with the request
   });
 };
+
 
 export const getAllBonusCodes = () => {
   return axios.get(`${API_URL}/all`);
 };
 
-export const toggleBonusCodeStatus = (codeId: string, active: boolean) => {
-  return axios.post(`${API_URL}/toggle`, { codeId, active });
+export const toggleBonusCodeStatus = async (
+  codeId: string,
+  active: boolean
+) => {
+  const token = localStorage.getItem("token"); // Adjust this based on where you're storing the token
+  return axios.post(
+    `${API_URL}/toggle`,
+    { codeId, active },
+    {
+      headers: {
+        Authorization: token ? `Bearer ${token}` : "",
+      },
+    }
+  );
 };
+
 
 export const getBonusHistory = (codeId: string) => {
   return axios.get(`${API_URL}/history/${codeId}`);

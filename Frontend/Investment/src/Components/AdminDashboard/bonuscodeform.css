@@ -33,3 +33,29 @@ button {
 button:hover {
   background-color: #218838;
 }
+
+
+.confirmation-message {
+  position: fixed;
+  bottom: 20px; /* Position it at the bottom */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #28a745; /* Green background */
+  color: white;
+  padding: 15px;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000; /* Make sure it appears above other content */
+  display: flex; /* Align text and button */
+  justify-content: space-between; /* Space between text and button */
+  width: 300px; /* Set a fixed width */
+}
+
+.close-button {
+  background: none; /* No background for the button */
+  border: none; /* Remove border */
+  color: white; /* White color for the close button */
+  font-size: 18px; /* Size of the close button */
+  cursor: pointer; /* Change cursor on hover */
+  margin-left: 10px; /* Space between message and button */
+}

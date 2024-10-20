@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./TokenPurchase.css"; // Assuming this CSS file contains your styles
+import "./TokenPurchase.css";
 
 const TokenPurchase: React.FC = () => {
   const [selectedToken, setSelectedToken] = useState<string | null>(null);
@@ -9,11 +9,14 @@ const TokenPurchase: React.FC = () => {
   const [bonusCodesData, setBonusCodesData] = useState<any[]>([]);
   const [tokenOptions, setTokenOptions] = useState<any[]>([]);
   const [investorId, setInvestorId] = useState<string | null>(null);
-  const [purchasePrice, setPurchasePrice] = useState<number>(0);
+  const [purchaseAmount, setPurchaseAmount] = useState<number>(100);
   const [usedBonusCodes, setUsedBonusCodes] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Fetch bonus codes on component load
+  // Pagination
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const tokensPerPage = 6;
+
   useEffect(() => {
     fetchBonusCodes();
   }, []);
@@ -26,7 +29,7 @@ const TokenPurchase: React.FC = () => {
       setTokenOptions(
         data.map((bonus: any) => ({
           _id: bonus._id,
-          name: bonus.token,
+          code: bonus.code,
           price: bonus.tokenPrice,
         }))
       );
@@ -88,19 +91,16 @@ const TokenPurchase: React.FC = () => {
     }
   };
 
-  const handleTokenSelection = (tokenId: string, price: number) => {
+  const handleTokenSelection = (tokenId: string) => {
     setSelectedToken(tokenId);
-    setPurchasePrice(price);
     setBonusCode("");
     setDiscount(0);
     setError("");
   };
 
   const handlePurchase = async () => {
-    if (!investorId || !selectedToken || purchasePrice <= 0) {
-      setError(
-        "Please create an account, select a token, and enter a valid price."
-      );
+    if (!investorId || !selectedToken || purchaseAmount <= 0) {
+      setError("Please create an account, select a token, and enter a valid amount.");
       return;
     }
 
@@ -112,16 +112,14 @@ const TokenPurchase: React.FC = () => {
         body: JSON.stringify({
           investorId,
           code: bonusCode,
-          tokenAmount: purchasePrice,
+          tokenAmount: purchaseAmount,
         }),
       });
 
       const data = await response.json();
       if (response.ok) {
         setUsedBonusCodes((prev) => [...prev, bonusCode]);
-        alert(
-          `Purchase successful! You bought tokens worth: ${data.finalTokenAmount}`
-        );
+        alert(`Purchase successful! You bought tokens: ${data.finalTokenAmount}`);
         resetPurchaseForm();
       } else {
         setError(data.message || "Purchase failed.");
@@ -136,73 +134,123 @@ const TokenPurchase: React.FC = () => {
 
   const resetPurchaseForm = () => {
     setSelectedToken(null);
-    setPurchasePrice(0);
+    setPurchaseAmount(100); // Reset to default
     setBonusCode("");
     setDiscount(0);
   };
 
-  const calculateTotal = () => {
-    const discountAmount = (purchasePrice * discount) / 100;
-    return purchasePrice - discountAmount;
+  const calculateTotalTokens = () => {
+    const bonusTokens = (purchaseAmount * discount) / 100;
+    return purchaseAmount + bonusTokens;
+  };
+
+  // Pagination Logic
+  const indexOfLastToken = currentPage * tokensPerPage;
+  const indexOfFirstToken = indexOfLastToken - tokensPerPage;
+  const currentTokens = tokenOptions.slice(indexOfFirstToken, indexOfLastToken);
+
+  const totalPages = Math.ceil(tokenOptions.length / tokensPerPage);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
   };
 
   return (
-    <div className="token-purchase">
-      <h2>Token Purchase</h2>
-      {!investorId && (
-        <div className="account-creation">
-          <h3>Create an Account</h3>
-          <button onClick={handleCreateAccount}>Create Account</button>
-        </div>
-      )}
+    <div className="token-purchase-page">
+      <header>
+        <h1>Token Purchase Portal</h1>
+        <p>Get exclusive tokens with bonus discounts!</p>
+      </header>
 
-      {investorId && <p>Your Investor ID: {investorId}</p>}
+      <section className="account-section">
+        {!investorId && (
+          <div className="create-account">
+            <h3>Create Your Account</h3>
+            <button className="primary-btn" onClick={handleCreateAccount}>
+              Create Account
+            </button>
+          </div>
+        )}
+        {investorId && <p className="investor-id">Investor ID: {investorId}</p>}
+      </section>
 
-      <div className="token-selection">
-        <h3>Select a Token</h3>
-        <ul>
-          {tokenOptions.map((token) => (
-            <li key={token._id}>
-              <p>Token: {token.name}</p>
-              <p>Price: {token.price} USD</p>
-              <button
-                onClick={() => handleTokenSelection(token._id, token.price)}
-              >
-                Buy Token
-              </button>
-              {selectedToken === token._id && (
-                <div className="purchase-form">
-                  <div className="form-group">
-                    <label htmlFor="purchase-price">
-                      Enter Purchase Price:
-                    </label>
-                    <input
-                      type="number"
-                      id="purchase-price"
-                      value={purchasePrice}
-                      onChange={(e) => setPurchasePrice(Number(e.target.value))}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="bonus-code">Bonus Code:</label>
-                    <input
-                      type="text"
-                      id="bonus-code"
-                      value={bonusCode}
-                      onChange={handleBonusCodeChange}
-                    />
-                    {error && <p className="error">{error}</p>}
-                  </div>
-                  <p>Total after discount: {calculateTotal()} USD</p>
-                  <button onClick={handlePurchase} disabled={isLoading}>
-                    {isLoading ? "Processing..." : "Confirm Purchase"}
-                  </button>
+      {investorId && (
+        <section className="purchase-section">
+          <h2>Purchase Tokens</h2>
+          <div className="token-list">
+            {currentTokens.map((token) => (
+              <div className="token-card" key={token._id}>
+                <div className="token-details">
+                  <h3>Bonus Code: {token.code}</h3>
+                  <p>Price: {token.price} USD</p>
                 </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      </div>
+                <button className="primary-btn" onClick={() => handleTokenSelection(token._id)}>
+                  Select Token
+                </button>
+
+                {selectedToken === token._id && (
+                  <div className="purchase-form">
+                    <div className="form-group">
+                      <label htmlFor="purchase-amount">Enter Number of Tokens:</label>
+                      <input
+                        type="number"
+                        id="purchase-amount"
+                        value={purchaseAmount}
+                        onChange={(e) => setPurchaseAmount(Number(e.target.value))}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="bonus-code">Bonus Code:</label>
+                      <input
+                        type="text"
+                        id="bonus-code"
+                        value={bonusCode}
+                        onChange={handleBonusCodeChange}
+                        placeholder="Enter bonus code"
+                      />
+                      {error && <p className="error">{error}</p>}
+                    </div>
+                    <p className="total-tokens">
+                      Total Tokens after bonus: <strong>{calculateTotalTokens()}</strong>
+                    </p>
+                    <button className="primary-btn confirm-purchase" onClick={handlePurchase} disabled={isLoading}>
+                      {isLoading ? "Processing..." : "Confirm Purchase"}
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Pagination Controls */}
+          {tokenOptions.length > tokensPerPage && (
+            <div className="pagination">
+              <button
+                className="pagination-btn"
+                onClick={handlePrevPage}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </button>
+              <button
+                className="pagination-btn"
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </section>
+      )}
     </div>
   );
 };

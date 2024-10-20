@@ -1,90 +1,139 @@
-/* src/Components/TokenPurchase.css */
+/* General Layout */
+.token-purchase-container {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Arial', sans-serif;
+}
 
-.token-purchase {
-  max-width: 600px;
-  margin: 0 auto;
+/* Sidebar Styles */
+.sidebar {
+  width: 250px;
+  background-color: #343a40;
+  color: white;
   padding: 20px;
-  text-align: center;
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
 }
 
-.token-purchase h2 {
-  text-align: center;
-  color: #333;
+.sidebar h3 {
+  font-size: 18px;
   margin-bottom: 20px;
+  color: #ffffff;
 }
 
-.account-creation, .token-selection {
+.sidebar-content ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar-content ul li {
+  margin: 15px 0;
+  font-size: 16px;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  padding: 20px;
+}
+
+header {
+  text-align: center;
   margin-bottom: 30px;
 }
 
-.account-creation h3, .token-selection h3 {
-  font-size: 18px;
-  color: #555;
+h1 {
+  font-size: 24px;
   margin-bottom: 10px;
 }
 
-.account-creation button, .token-selection button {
+p {
+  font-size: 16px;
+  color: #666;
+}
+
+.account-section {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.investor-id {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.create-account {
+  margin-bottom: 20px;
+}
+
+.purchase-section h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.token-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.token-card {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.token-details {
+  margin-bottom: 20px;
+}
+
+.primary-btn {
   background-color: #007bff;
   color: white;
-  padding: 10px 15px;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.primary-btn:hover {
+  background-color: #0056b3;
+}
+
+.total-tokens {
+  font-size: 16px;
+  margin: 15px 0;
+}
+
+.error {
+  color: red;
+  font-size: 14px;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.pagination-btn {
+  padding: 10px 20px;
+  margin: 0 5px;
+  background-color: #007bff;
+  color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
 }
 
-.account-creation button:hover, .token-selection button:hover {
-  background-color: #0056b3;
-}
-
-ul {
-  list-style: none;
-  padding: 0;
-}
-
-ul li {
-  margin-bottom: 20px;
-  padding: 15px;
-  border: 1px solid #eee;
-  border-radius: 6px;
-  background-color: #f9f9f9;
-}
-
-ul li p {
-  margin: 0;
-  font-size: 16px;
-  color: #333;
-}
-
-.purchase-form {
-  margin-top: 10px;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-group label {
-  display: block;
-  font-size: 14px;
-  color: #333;
-  margin-bottom: 5px;
-}
-
-.form-group input {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-.error {
-  color: red;
-  font-size: 12px;
-}
-
-button:disabled {
+.pagination-btn:disabled {
   background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #0056b3;
 }

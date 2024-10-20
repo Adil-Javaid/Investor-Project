@@ -8,7 +8,7 @@ const AdminDashboard: React.FC = () => {
   const [selectedBonusCode, setSelectedBonusCode] = useState<string | null>(
     null
   );
-  const investorId = "investor-z1pq907eo"; 
+  const investorId = "investor-6fl047vuq"; 
 
   return (
     <div className="admin-dashboard">

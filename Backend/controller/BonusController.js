@@ -100,34 +100,25 @@ exports.getAllBonusCodes = async (req, res) => {
 exports.toggleBonusCodeStatus = async (req, res) => {
   const { codeId, active } = req.body;
 
-  // Check if req.user is defined
-  if (!req.user) {
-    return res.status(403).json({ message: "Unauthorized access" });
-  }
-
-  const userId = req.user._id; // Get the admin's user ID
-
   try {
     const bonusCode = await BonusCode.findByIdAndUpdate(
       codeId,
-      {
-        active,
-        deactivatedBy: active ? null : userId,
-      },
+      { active: active },
       { new: true }
     );
 
     if (!bonusCode) {
-      return res.status(404).json({ message: "Bonus code not found" });
+      return res.status(404).json({ message: "Bonus code not found." });
     }
 
     res.json({
-      message: `Bonus code ${active ? "activated" : "deactivated"}`,
-      deactivatedBy: active ? null : req.user.username, // Make sure 'username' exists
+      message: `Bonus code ${
+        active ? "activated" : "deactivated"
+      } successfully.`,
     });
   } catch (error) {
     console.error("Error toggling bonus code status:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: "Internal server error." });
   }
 };
 
@@ -155,15 +146,15 @@ exports.applyBonusCode = async (req, res) => {
         .json({ message: "Invalid or inactive bonus code." });
     }
 
-    // Calculate the bonus tokens based on the discount percentage
+    // Calculate bonus tokens
     const bonusTokens = (tokenAmount * bonusCode.discountPercentage) / 100;
     const totalTokens = tokenAmount + bonusTokens;
 
-    // Update the investor's token count and mark the bonus code as used
+    // Update investor's token count and mark bonus code as used
     investor.tokenPurchased += totalTokens;
     investor.bonusCodesUsed.push(bonusCode._id);
     bonusCode.usedBy.push(investor._id);
-    bonusCode.active = false;
+    bonusCode.active = false; // Deactivate the bonus code after use
 
     await investor.save();
     await bonusCode.save();
@@ -206,4 +197,5 @@ exports.bonusHistory = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 }
+
 

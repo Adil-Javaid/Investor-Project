@@ -26,18 +26,8 @@ export const toggleBonusCodeStatus = async (
   codeId: string,
   active: boolean
 ) => {
-  const token = localStorage.getItem("token"); // Adjust this based on where you're storing the token
-  return axios.post(
-    `${API_URL}/toggle`,
-    { codeId, active },
-    {
-      headers: {
-        Authorization: token ? `Bearer ${token}` : "",
-      },
-    }
-  );
+  return axios.post(`${API_URL}/toggle`, { codeId, active });
 };
-
 
 export const getBonusHistory = (codeId: string) => {
   return axios.get(`${API_URL}/history/${codeId}`);

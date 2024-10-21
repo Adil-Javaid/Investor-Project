@@ -56,7 +56,7 @@ app.use(
 app.use("/api/bonus", bonusRoutes);
 app.use("/api/bonus/admin/login", AdminController.loginAdmin);
 
-app.use("/api/bonus/toggle", ToggleController.toggleBonusCodeStatus);
+// app.use("/api/bonus/toggle", ToggleController.toggleBonusCodeStatus);
 // app.use("/api", authenticateAdmin, bonusRoutes);
 app.use("/api/investor", investorRoutes);
 

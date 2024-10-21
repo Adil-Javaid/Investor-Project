@@ -12,10 +12,15 @@ const TokenPurchase: React.FC = () => {
   const [purchaseAmount, setPurchaseAmount] = useState<number>(100);
   const [usedBonusCodes, setUsedBonusCodes] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [message, setMessage] = useState<string | null>(null);
 
-  // Pagination
+  // Track which option is selected
+  const [showAllBonusCodes, setShowAllBonusCodes] = useState<boolean>(false);
+  const [showTokenPurchase, setShowTokenPurchase] = useState<boolean>(true); // Show token purchase by default
+
+  // Pagination states
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const tokensPerPage = 6;
+  const itemsPerPage = 6; // Show 6 tokens per page
 
   useEffect(() => {
     fetchBonusCodes();
@@ -58,14 +63,14 @@ const TokenPurchase: React.FC = () => {
       );
 
       if (response.ok) {
-        alert(`Account created! Your Investor ID: ${id}`);
+        setMessage(`Account created! Your Investor ID: ${id}`);
       } else {
         const data = await response.json();
-        alert(data.message || "Failed to create account.");
+        setMessage(data.message || "Failed to create account.");
       }
     } catch (error) {
       console.error("Error creating account:", error);
-      alert("Failed to create account.");
+      setMessage("Failed to create account.");
     }
   };
 
@@ -100,7 +105,9 @@ const TokenPurchase: React.FC = () => {
 
   const handlePurchase = async () => {
     if (!investorId || !selectedToken || purchaseAmount <= 0) {
-      setError("Please create an account, select a token, and enter a valid amount.");
+      setError(
+        "Please create an account, select a token, and enter a valid amount."
+      );
       return;
     }
 
@@ -119,7 +126,9 @@ const TokenPurchase: React.FC = () => {
       const data = await response.json();
       if (response.ok) {
         setUsedBonusCodes((prev) => [...prev, bonusCode]);
-        alert(`Purchase successful! You bought tokens: ${data.finalTokenAmount}`);
+        setMessage(
+          `Purchase successful! You bought tokens: ${data.finalTokenAmount}`
+        );
         resetPurchaseForm();
       } else {
         setError(data.message || "Purchase failed.");
@@ -144,113 +153,181 @@ const TokenPurchase: React.FC = () => {
     return purchaseAmount + bonusTokens;
   };
 
-  // Pagination Logic
-  const indexOfLastToken = currentPage * tokensPerPage;
-  const indexOfFirstToken = indexOfLastToken - tokensPerPage;
-  const currentTokens = tokenOptions.slice(indexOfFirstToken, indexOfLastToken);
+  const handleCloseMessage = () => {
+    setMessage(null);
+  };
 
-  const totalPages = Math.ceil(tokenOptions.length / tokensPerPage);
+  const handleShowAllBonusCodes = () => {
+    setShowAllBonusCodes(true);
+    setShowTokenPurchase(false); // Hide token purchase section
+  };
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage((prev) => prev + 1);
+  const handleShowTokenPurchase = () => {
+    setShowTokenPurchase(true);
+    setShowAllBonusCodes(false); // Hide bonus codes section
+  };
+
+  // Pagination handling with previous and next buttons
+  const handlePageChange = (direction: string) => {
+    if (direction === "prev" && currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    } else if (
+      direction === "next" &&
+      currentPage < Math.ceil(tokenOptions.length / itemsPerPage)
+    ) {
+      setCurrentPage(currentPage + 1);
     }
   };
 
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage((prev) => prev - 1);
-    }
-  };
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentTokenOptions = tokenOptions.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
 
   return (
     <div className="token-purchase-page">
-      <header>
-        <h1>Token Purchase Portal</h1>
-        <p>Get exclusive tokens with bonus discounts!</p>
-      </header>
+      {/* Top navigation (acts as sidebar but at top) */}
+      <div className="top-nav">
+        <ul>
+          <li
+            className={showAllBonusCodes ? "active" : ""}
+            onClick={handleShowAllBonusCodes}
+          >
+            Show All Bonus Codes
+          </li>
+          <li
+            className={showTokenPurchase ? "active" : ""}
+            onClick={handleShowTokenPurchase}
+          >
+            Token Purchase by User
+          </li>
+        </ul>
+      </div>
 
-      <section className="account-section">
-        {!investorId && (
-          <div className="create-account">
-            <h3>Create Your Account</h3>
-            <button className="primary-btn" onClick={handleCreateAccount}>
-              Create Account
+      <div className="content">
+        <header>
+          <h1>Token Purchase Portal</h1>
+          <p>Get exclusive tokens with bonus discounts!</p>
+        </header>
+
+        {showAllBonusCodes && (
+          <section className="bonus-code-list">
+            <h2>All Bonus Codes</h2>
+            <ul>
+              {bonusCodesData.map((bonus) => (
+                <li key={bonus._id}>
+                  Code: {bonus.code}, Discount: {bonus.discountPercentage}%
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {showTokenPurchase && (
+          <>
+            <section className="account-section">
+              {!investorId && (
+                <div className="create-account">
+                  <h3>Create Your Account</h3>
+                  <button className="primary-btn" onClick={handleCreateAccount}>
+                    Create Account
+                  </button>
+                </div>
+              )}
+              {investorId && (
+                <p className="investor-id">Investor ID: {investorId}</p>
+              )}
+            </section>
+
+            {investorId && (
+              <section className="purchase-section">
+                <h2>Purchase Tokens</h2>
+                <div className="token-list">
+                  {currentTokenOptions.map((token) => (
+                    <div className="token-card" key={token._id}>
+                      <div className="token-details">
+                        <h3>Bonus Code: {token.code}</h3>
+                        <p>Price: {token.price} USD</p>
+                      </div>
+                      <button
+                        className="primary-btn"
+                        onClick={() => handleTokenSelection(token._id)}
+                      >
+                        Select Token
+                      </button>
+
+                      {selectedToken === token._id && (
+                        <div className="purchase-form">
+                          <div className="form-group">
+                            <label>Number of Tokens: {purchaseAmount}</label>
+                          </div>
+                          <div className="form-group bonus-input">
+                            <label htmlFor="bonus-code">Bonus Code</label>
+                            <input
+                              id="bonus-code"
+                              type="text"
+                              value={bonusCode}
+                              onChange={handleBonusCodeChange}
+                            />
+                          </div>
+                          <p>Total Tokens: {calculateTotalTokens()}</p>
+                          <button
+                            className="primary-btn"
+                            onClick={handlePurchase}
+                            disabled={isLoading}
+                          >
+                            {isLoading ? "Processing..." : "Purchase"}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Pagination Controls */}
+                <div className="pagination">
+                  <button
+                    onClick={() => handlePageChange("prev")}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => handlePageChange("next")}
+                    disabled={
+                      currentPage === Math.ceil(tokenOptions.length / itemsPerPage)
+                    }
+                  >
+                    Next
+                  </button>
+                </div>
+              </section>
+            )}
+          </>
+        )}
+
+        {/* Centered message popup */}
+        {message && (
+          <div className="message-popup bottom-center">
+            <p>{message}</p>
+            <button className="close-btn" onClick={handleCloseMessage}>
+              Close
             </button>
           </div>
         )}
-        {investorId && <p className="investor-id">Investor ID: {investorId}</p>}
-      </section>
 
-      {investorId && (
-        <section className="purchase-section">
-          <h2>Purchase Tokens</h2>
-          <div className="token-list">
-            {currentTokens.map((token) => (
-              <div className="token-card" key={token._id}>
-                <div className="token-details">
-                  <h3>Bonus Code: {token.code}</h3>
-                  <p>Price: {token.price} USD</p>
-                </div>
-                <button className="primary-btn" onClick={() => handleTokenSelection(token._id)}>
-                  Select Token
-                </button>
-
-                {selectedToken === token._id && (
-                  <div className="purchase-form">
-                    <div className="form-group">
-                      <label htmlFor="purchase-amount">Enter Number of Tokens:</label>
-                      <input
-                        type="number"
-                        id="purchase-amount"
-                        value={purchaseAmount}
-                        onChange={(e) => setPurchaseAmount(Number(e.target.value))}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="bonus-code">Bonus Code:</label>
-                      <input
-                        type="text"
-                        id="bonus-code"
-                        value={bonusCode}
-                        onChange={handleBonusCodeChange}
-                        placeholder="Enter bonus code"
-                      />
-                      {error && <p className="error">{error}</p>}
-                    </div>
-                    <p className="total-tokens">
-                      Total Tokens after bonus: <strong>{calculateTotalTokens()}</strong>
-                    </p>
-                    <button className="primary-btn confirm-purchase" onClick={handlePurchase} disabled={isLoading}>
-                      {isLoading ? "Processing..." : "Confirm Purchase"}
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))}
+        {/* Centered error message */}
+        {error && (
+          <div className="error-popup bottom-center">
+            <p>{error}</p>
+            <button className="close-btn" onClick={() => setError("")}>
+              Close
+            </button>
           </div>
-
-          {/* Pagination Controls */}
-          {tokenOptions.length > tokensPerPage && (
-            <div className="pagination">
-              <button
-                className="pagination-btn"
-                onClick={handlePrevPage}
-                disabled={currentPage === 1}
-              >
-                Previous
-              </button>
-              <button
-                className="pagination-btn"
-                onClick={handleNextPage}
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </button>
-            </div>
-          )}
-        </section>
-      )}
+        )}
+      </div>
     </div>
   );
 };

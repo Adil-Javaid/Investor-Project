@@ -9,7 +9,7 @@ const AdminDashboard: React.FC = () => {
   const [selectedBonusCode, setSelectedBonusCode] = useState<string | null>(
     null
   );
-  const investorId = "investor-wdtyw55eb";
+  const investorId = "investor-mw0h01jy7";
 
   const renderContent = () => {
     switch (selectedMenu) {

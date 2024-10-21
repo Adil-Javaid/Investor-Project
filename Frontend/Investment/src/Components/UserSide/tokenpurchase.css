@@ -1,39 +1,48 @@
 /* General Layout */
-.token-purchase-container {
+.token-purchase-page {
   display: flex;
+  flex-direction: column;
   min-height: 100vh;
   font-family: 'Arial', sans-serif;
+  background-color: #f4f6f8;
+  color: #333;
 }
 
-/* Sidebar Styles */
-.sidebar {
-  width: 250px;
+.top-nav {
   background-color: #343a40;
-  color: white;
-  padding: 20px;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  color: #fff;
+  padding: 15px 20px;
 }
 
-.sidebar h3 {
-  font-size: 18px;
-  margin-bottom: 20px;
-  color: #ffffff;
-}
-
-.sidebar-content ul {
+.top-nav ul {
   list-style: none;
+  display: flex;
+  justify-content: center;
+  margin: 0;
   padding: 0;
 }
 
-.sidebar-content ul li {
-  margin: 15px 0;
-  font-size: 16px;
+.top-nav ul li {
+  margin: 0 15px;
+  cursor: pointer;
+  padding: 10px 15px;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
 }
 
-/* Main Content */
-.main-content {
+.top-nav ul li.active,
+.top-nav ul li:hover {
+  background-color: #495057;
+}
+
+.content {
   flex: 1;
   padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 header {
@@ -41,13 +50,13 @@ header {
   margin-bottom: 30px;
 }
 
-h1 {
-  font-size: 24px;
-  margin-bottom: 10px;
+header h1 {
+  font-size: 28px;
+  color: #343a40;
 }
 
-p {
-  font-size: 16px;
+header p {
+  font-size: 18px;
   color: #666;
 }
 
@@ -58,34 +67,53 @@ p {
 
 .investor-id {
   font-weight: bold;
-  font-size: 16px;
+  font-size: 18px;
+  margin-top: 15px;
+  color: #007bff;
 }
 
-.create-account {
-  margin-bottom: 20px;
+.create-account button {
+  font-size: 16px;
 }
 
 .purchase-section h2 {
   text-align: center;
-  margin-bottom: 20px;
+  font-size: 22px;
+  margin-bottom: 25px;
+  color: #343a40;
 }
 
 .token-list {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
 }
 
 .token-card {
-  background-color: #f8f9fa;
+  background-color: #ffffff;
   border-radius: 8px;
   padding: 20px;
   text-align: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.token-card:hover {
+  transform: translateY(-5px);
 }
 
 .token-details {
-  margin-bottom: 20px;
+  margin-bottom: 15px;
+}
+
+.token-details h3 {
+  font-size: 20px;
+  color: #007bff;
+}
+
+.token-details p {
+  font-size: 16px;
+  color: #333;
 }
 
 .primary-btn {
@@ -96,15 +124,33 @@ p {
   cursor: pointer;
   border-radius: 4px;
   transition: background-color 0.3s ease;
+  font-size: 16px;
 }
 
 .primary-btn:hover {
   background-color: #0056b3;
 }
 
-.total-tokens {
+.form-group {
+  margin: 10px 0;
+}
+
+.form-group label {
   font-size: 16px;
-  margin: 15px 0;
+  color: #333;
+}
+
+.bonus-input input {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  width: 100%;
+  font-size: 16px;
+}
+
+.total-tokens {
+  font-size: 18px;
+  margin: 10px 0;
 }
 
 .error {
@@ -119,21 +165,65 @@ p {
   margin-top: 20px;
 }
 
-.pagination-btn {
-  padding: 10px 20px;
+.pagination button {
+  padding: 10px 15px;
   margin: 0 5px;
   background-color: #007bff;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-.pagination-btn:disabled {
-  background-color: #cccccc;
+.pagination button:disabled {
+  background-color: #ccc;
   cursor: not-allowed;
 }
 
-.pagination-btn:hover:not(:disabled) {
+.pagination button:hover:not(:disabled) {
   background-color: #0056b3;
+}
+
+/* Message Popup */
+.message-popup,
+.error-popup {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #28a745;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.error-popup {
+  background-color: #dc3545;
+}
+
+.message-popup .close-btn,
+.error-popup .close-btn {
+  background-color: transparent;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: 20px;
+}
+
+.message-popup .close-btn:hover,
+.error-popup .close-btn:hover {
+  color: #ffc107;
+}
+
+@media (max-width: 768px) {
+  .token-list {
+    grid-template-columns: 1fr;
+  }
 }

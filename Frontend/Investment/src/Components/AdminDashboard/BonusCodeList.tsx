@@ -37,13 +37,14 @@ const BonusCodeList: React.FC<{ onSelectBonusCode: (id: string) => void }> = ({
 
   const handleToggle = async (codeId: string, active: boolean) => {
     try {
-      await toggleBonusCodeStatus(codeId, !active);
-      fetchBonusCodes();
+      await toggleBonusCodeStatus(codeId, !active); // This sends the current active status to the backend
+      fetchBonusCodes(); // Refresh the list after toggling
     } catch (error) {
       console.error(error);
-      alert("You are not authorized to perform this action."); // Inform the user
+      alert("Action failed."); // Inform the admin if it fails
     }
   };
+
 
 
   const handleNext = () => {

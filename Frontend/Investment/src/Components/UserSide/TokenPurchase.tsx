@@ -20,7 +20,7 @@ const TokenPurchase: React.FC = () => {
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const itemsPerPage = 6; // Show 6 tokens per page
+  const itemsPerPage = 8; // Show 6 tokens per page
 
   useEffect(() => {
     fetchBonusCodes();
